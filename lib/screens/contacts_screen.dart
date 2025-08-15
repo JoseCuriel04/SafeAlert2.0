@@ -11,6 +11,7 @@ class ContactsScreen extends StatefulWidget {
 
 class _ContactsScreenState extends State<ContactsScreen> {
   List<Contact> _contacts = [];
+  List<Contact> _appContacts = []; // Lista para contactos añadidos en la app
 
   @override
   void initState() {
@@ -23,7 +24,6 @@ class _ContactsScreenState extends State<ContactsScreen> {
     if (permissionStatus == PermissionStatus.granted) {
       _fetchContacts();
     } else {
-      // Handle the case where the user denies permission
       print('Permission denied');
     }
   }
@@ -35,33 +35,112 @@ class _ContactsScreenState extends State<ContactsScreen> {
     });
   }
 
+  void _addContactDialog() {
+    final _formKey = GlobalKey<FormState>();
+    String name = '';
+    String phone = '';
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Añadir Contacto'),
+          content: Form(
+            key: _formKey,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextFormField(
+                  decoration: const InputDecoration(labelText: 'Nombre'),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Por favor ingresa un nombre';
+                    }
+                    return null;
+                  },
+                  onSaved: (value) {
+                    name = value!;
+                  },
+                ),
+                TextFormField(
+                  decoration: const InputDecoration(labelText: 'Teléfono'),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Por favor ingresa un teléfono';
+                    }
+                    return null;
+                  },
+                  onSaved: (value) {
+                    phone = value!;
+                  },
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('Cancelar'),
+            ),
+            TextButton(
+              onPressed: () {
+                if (_formKey.currentState!.validate()) {
+                  _formKey.currentState!.save();
+                  setState(() {
+                    _appContacts.add(Contact(
+                      displayName: name,
+                      phones: [Item(label: 'mobile', value: phone)],
+                    ));
+                  });
+                  Navigator.of(context).pop();
+                }
+              },
+              child: const Text('Guardar'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    List<Contact> allContacts = [..._contacts, ..._appContacts];
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Contactos'),
+        title: const Text('Contactos de Emergencia'),
       ),
-      body: _contacts.isEmpty
-          ? const Center(child: CircularProgressIndicator())
+      body: allContacts.isEmpty
+          ? const Center(child: Text('No hay contactos disponibles'))
           : ListView.builder(
-              itemCount: _contacts.length,
+              itemCount: allContacts.length,
               itemBuilder: (context, index) {
-                Contact contact = _contacts[index];
+                Contact contact = allContacts[index];
                 return ListTile(
-                  leading: contact.avatar != null && contact.avatar!.isNotEmpty
-                      ? CircleAvatar(
-                          backgroundImage: MemoryImage(contact.avatar!),
-                        )
-                      : const CircleAvatar(
-                          child: Icon(Icons.person),
-                        ),
-                  title: Text(contact.displayName ?? 'No Name'),
+                  leading: const CircleAvatar(
+                    child: Icon(Icons.person),
+                  ),
+                  title: Text(contact.displayName ?? 'Sin nombre'),
                   subtitle: Text(contact.phones?.isNotEmpty == true
-                      ? contact.phones!.first.value ?? 'No Phone'
-                      : 'No Phone'),
+                      ? contact.phones!.first.value ?? 'Sin teléfono'
+                      : 'Sin teléfono'),
+                  trailing: IconButton(
+                    icon: const Icon(Icons.message),
+                    onPressed: () {
+                      // Lógica para enviar mensaje
+                    },
+                  ),
                 );
               },
             ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _addContactDialog,
+        backgroundColor: Colors.blueGrey,
+        child: const Icon(Icons.add, color: Colors.white),
+      ),
     );
   }
 }
