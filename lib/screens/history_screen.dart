@@ -1,11 +1,17 @@
 import 'package:flutter/material.dart';
 
 class HistoryScreen extends StatelessWidget {
+  const HistoryScreen({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: const Text('Historial de Alertas'),
+        backgroundColor: const Color(0xFF1E3A8A),
+      ),
       body: Container(
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
@@ -16,52 +22,13 @@ class HistoryScreen extends StatelessWidget {
             ],
           ),
         ),
-        child: SafeArea(
-          child: Column(
-            children: [
-              Padding(
-                padding: EdgeInsets.all(20),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      'Historial de Alertas',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Expanded(
-                child: ListView(
-                  children: [
-                    _buildAlertItem('Alerta 1', '22/07/2025'),
-                    _buildAlertItem('Alerta 2', '21/07/2025'),
-                    // Añade más alertas aquí
-                  ],
-                ),
-              ),
-            ],
+        child: const SafeArea(
+          child: Center(
+            child: Text(
+              'Historial de Alertas',
+              style: TextStyle(color: Colors.white),
+            ),
           ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildAlertItem(String title, String date) {
-    return Card(
-      margin: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-      child: ListTile(
-        title: Text(title),
-        subtitle: Text('Fecha: $date'),
-        trailing: IconButton(
-          icon: Icon(Icons.map, color: Colors.blueGrey),
-          onPressed: () {
-            // Lógica para ver en el mapa
-          },
         ),
       ),
     );
